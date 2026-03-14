@@ -37,7 +37,7 @@ Aplicacao web para descoberta e organizacao de filmes e series com autenticacao,
 
 3. Configure no `.env`:
 
-   - `DATABASE_URL`
+   - `DATABASE_URL` (PostgreSQL)
    - `NEXTAUTH_URL`
    - `NEXTAUTH_SECRET`
    - `GOOGLE_CLIENT_ID`
@@ -122,7 +122,20 @@ A Vercel possui integracao nativa com Next.js.
    - `NEXTAUTH_URL`
    - `TMDB_API_KEY`
    - `DATABASE_URL`
-4. Salve e execute o primeiro deploy.
+4. Em Production Command (ou Build Step), garanta migration antes do deploy:
+
+    npm run prisma:migrate:deploy
+
+5. Salve e execute o primeiro deploy.
+
+### Google OAuth em producao
+
+No Google Cloud Console, adicione:
+
+- Authorized JavaScript origins:
+   - `https://my-movies-wine.vercel.app`
+- Authorized redirect URIs:
+   - `https://my-movies-wine.vercel.app/api/auth/callback/google`
 
 ## Fluxo de Desenvolvimento
 
