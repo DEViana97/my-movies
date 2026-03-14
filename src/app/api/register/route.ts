@@ -1,7 +1,8 @@
 import { hash } from "bcryptjs";
-import { NextResponse } from "next/server";
 import { z } from "zod";
+import { apiError, apiOk } from "@/lib/api-response";
 import { prisma } from "@/lib/prisma";
+import { checkRateLimit, getRequestIp } from "@/lib/rate-limit";
 
 const registerSchema = z.object({
   name: z.string().trim().max(80).optional(),
@@ -16,11 +17,22 @@ const registerSchema = z.object({
 });
 
 export async function POST(req: Request) {
+  const limiter = checkRateLimit(`register:${getRequestIp(req)}`, {
+    windowMs: 10 * 60 * 1000,
+    limit: 8,
+  });
+
+  if (!limiter.allowed) {
+    return apiError(429, "RATE_LIMITED", "Muitas tentativas. Tente novamente em instantes.", {
+      retryAfterSeconds: limiter.retryAfterSeconds,
+    });
+  }
+
   const body = await req.json().catch(() => null);
   const parsed = registerSchema.safeParse(body);
 
   if (!parsed.success) {
-    return NextResponse.json({ error: parsed.error.issues[0]?.message ?? "Dados invalidos" }, { status: 400 });
+    return apiError(400, "VALIDATION_ERROR", parsed.error.issues[0]?.message ?? "Dados invalidos", parsed.error.flatten());
   }
 
   const username = parsed.data.username.toLowerCase();
@@ -34,11 +46,11 @@ export async function POST(req: Request) {
   });
 
   if (existingUser?.username === username) {
-    return NextResponse.json({ error: "Usuario ja esta em uso" }, { status: 409 });
+    return apiError(409, "CONFLICT", "Usuario ja esta em uso");
   }
 
   if (existingUser?.email === email) {
-    return NextResponse.json({ error: "Email ja esta em uso" }, { status: 409 });
+    return apiError(409, "CONFLICT", "Email ja esta em uso");
   }
 
   const passwordHash = await hash(parsed.data.password, 12);
@@ -52,5 +64,5 @@ export async function POST(req: Request) {
     },
   });
 
-  return NextResponse.json({ ok: true }, { status: 201 });
+  return apiOk({}, 201);
 }

@@ -1,8 +1,9 @@
 import { ListType, type MediaType } from "@prisma/client";
 import { getServerSession } from "next-auth";
-import { NextResponse } from "next/server";
 import { z } from "zod";
+import { apiError, apiOk } from "@/lib/api-response";
 import { authOptions } from "@/lib/auth";
+import { checkRateLimit, getRequestIp } from "@/lib/rate-limit";
 import { moveToWatched, removeUserListItem, upsertUserListItem } from "@/services/user-lists";
 
 const baseSchema = z.object({
@@ -32,12 +33,23 @@ async function getSessionUserId() {
 }
 
 export async function POST(req: Request) {
+  const limiter = checkRateLimit(`user-lists-post:${getRequestIp(req)}`, {
+    windowMs: 5 * 60 * 1000,
+    limit: 120,
+  });
+
+  if (!limiter.allowed) {
+    return apiError(429, "RATE_LIMITED", "Muitas acoes em pouco tempo. Tente novamente em instantes.", {
+      retryAfterSeconds: limiter.retryAfterSeconds,
+    });
+  }
+
   const userId = await getSessionUserId();
-  if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!userId) return apiError(401, "UNAUTHORIZED", "Unauthorized");
 
   const parsed = saveSchema.safeParse(await req.json());
   if (!parsed.success) {
-    return NextResponse.json({ error: "Invalid payload", details: parsed.error.flatten() }, { status: 400 });
+    return apiError(400, "VALIDATION_ERROR", "Invalid payload", parsed.error.flatten());
   }
 
   const { listType, ...payload } = parsed.data;
@@ -47,7 +59,7 @@ export async function POST(req: Request) {
       ...payload,
       mediaType: payload.mediaType as MediaType,
     });
-    return NextResponse.json({ success: true });
+    return apiOk({ success: true });
   }
 
   await upsertUserListItem(userId, listType, {
@@ -55,18 +67,29 @@ export async function POST(req: Request) {
     mediaType: payload.mediaType as MediaType,
   });
 
-  return NextResponse.json({ success: true });
+  return apiOk({ success: true });
 }
 
 export async function DELETE(req: Request) {
+  const limiter = checkRateLimit(`user-lists-delete:${getRequestIp(req)}`, {
+    windowMs: 5 * 60 * 1000,
+    limit: 120,
+  });
+
+  if (!limiter.allowed) {
+    return apiError(429, "RATE_LIMITED", "Muitas acoes em pouco tempo. Tente novamente em instantes.", {
+      retryAfterSeconds: limiter.retryAfterSeconds,
+    });
+  }
+
   const userId = await getSessionUserId();
-  if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!userId) return apiError(401, "UNAUTHORIZED", "Unauthorized");
 
   const parsed = removeSchema.safeParse(await req.json());
   if (!parsed.success) {
-    return NextResponse.json({ error: "Invalid payload", details: parsed.error.flatten() }, { status: 400 });
+    return apiError(400, "VALIDATION_ERROR", "Invalid payload", parsed.error.flatten());
   }
 
   await removeUserListItem(userId, parsed.data.listType, parsed.data.tmdbId, parsed.data.mediaType as MediaType);
-  return NextResponse.json({ success: true });
+  return apiOk({ success: true });
 }

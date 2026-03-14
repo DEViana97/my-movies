@@ -1,11 +1,13 @@
 import { compare, hash } from "bcryptjs";
+import { randomUUID } from "node:crypto";
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { getServerSession } from "next-auth";
-import { NextResponse } from "next/server";
 import { z } from "zod";
+import { apiError, apiOk } from "@/lib/api-response";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { checkRateLimit, getRequestIp } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 
@@ -27,10 +29,46 @@ function fileExtensionFromType(contentType: string) {
   return null;
 }
 
+function imageTypeFromSignature(bytes: Uint8Array) {
+  if (
+    bytes.length >= 8 &&
+    bytes[0] === 0x89 &&
+    bytes[1] === 0x50 &&
+    bytes[2] === 0x4e &&
+    bytes[3] === 0x47 &&
+    bytes[4] === 0x0d &&
+    bytes[5] === 0x0a &&
+    bytes[6] === 0x1a &&
+    bytes[7] === 0x0a
+  ) {
+    return "image/png";
+  }
+
+  if (bytes.length >= 3 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) {
+    return "image/jpeg";
+  }
+
+  if (
+    bytes.length >= 12 &&
+    bytes[0] === 0x52 &&
+    bytes[1] === 0x49 &&
+    bytes[2] === 0x46 &&
+    bytes[3] === 0x46 &&
+    bytes[8] === 0x57 &&
+    bytes[9] === 0x45 &&
+    bytes[10] === 0x42 &&
+    bytes[11] === 0x50
+  ) {
+    return "image/webp";
+  }
+
+  return null;
+}
+
 export async function GET() {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) {
-    return NextResponse.json({ error: "Nao autenticado" }, { status: 401 });
+    return apiError(401, "UNAUTHORIZED", "Nao autenticado");
   }
 
   const user = await prisma.user.findUnique({
@@ -44,16 +82,27 @@ export async function GET() {
   });
 
   if (!user) {
-    return NextResponse.json({ error: "Usuario nao encontrado" }, { status: 404 });
+    return apiError(404, "NOT_FOUND", "Usuario nao encontrado");
   }
 
-  return NextResponse.json(user);
+  return apiOk(user);
 }
 
 export async function PATCH(req: Request) {
+  const limiter = checkRateLimit(`profile-patch:${getRequestIp(req)}`, {
+    windowMs: 10 * 60 * 1000,
+    limit: 20,
+  });
+
+  if (!limiter.allowed) {
+    return apiError(429, "RATE_LIMITED", "Muitas tentativas. Tente novamente em instantes.", {
+      retryAfterSeconds: limiter.retryAfterSeconds,
+    });
+  }
+
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) {
-    return NextResponse.json({ error: "Nao autenticado" }, { status: 401 });
+    return apiError(401, "UNAUTHORIZED", "Nao autenticado");
   }
 
   const formData = await req.formData();
@@ -64,7 +113,7 @@ export async function PATCH(req: Request) {
   });
 
   if (!parsed.success) {
-    return NextResponse.json({ error: parsed.error.issues[0]?.message ?? "Dados invalidos" }, { status: 400 });
+    return apiError(400, "VALIDATION_ERROR", parsed.error.issues[0]?.message ?? "Dados invalidos", parsed.error.flatten());
   }
 
   const username = parsed.data.username.toLowerCase();
@@ -84,7 +133,7 @@ export async function PATCH(req: Request) {
   });
 
   if (!user) {
-    return NextResponse.json({ error: "Usuario nao encontrado" }, { status: 404 });
+    return apiError(404, "NOT_FOUND", "Usuario nao encontrado");
   }
 
   const usernameInUse = await prisma.user.findFirst({
@@ -96,23 +145,23 @@ export async function PATCH(req: Request) {
   });
 
   if (usernameInUse) {
-    return NextResponse.json({ error: "Usuario ja esta em uso" }, { status: 409 });
+    return apiError(409, "CONFLICT", "Usuario ja esta em uso");
   }
 
   let passwordHash = user.passwordHash;
   if (newPassword) {
     if (newPassword.length < 6) {
-      return NextResponse.json({ error: "Nova senha deve ter no minimo 6 caracteres" }, { status: 400 });
+      return apiError(400, "VALIDATION_ERROR", "Nova senha deve ter no minimo 6 caracteres");
     }
 
     if (user.passwordHash) {
       if (!currentPassword) {
-        return NextResponse.json({ error: "Informe a senha atual para alterar a senha" }, { status: 400 });
+        return apiError(400, "VALIDATION_ERROR", "Informe a senha atual para alterar a senha");
       }
 
       const passwordValid = await compare(currentPassword, user.passwordHash);
       if (!passwordValid) {
-        return NextResponse.json({ error: "Senha atual incorreta" }, { status: 400 });
+        return apiError(400, "VALIDATION_ERROR", "Senha atual incorreta");
       }
     }
 
@@ -124,20 +173,29 @@ export async function PATCH(req: Request) {
 
   if (photo instanceof File && photo.size > 0) {
     if (photo.size > 2 * 1024 * 1024) {
-      return NextResponse.json({ error: "A imagem deve ter no maximo 2MB" }, { status: 400 });
+      return apiError(400, "VALIDATION_ERROR", "A imagem deve ter no maximo 2MB");
     }
 
-    const ext = fileExtensionFromType(photo.type);
+    const fileBytes = Buffer.from(await photo.arrayBuffer());
+    const detectedType = imageTypeFromSignature(fileBytes);
+    if (!detectedType) {
+      return apiError(400, "VALIDATION_ERROR", "Arquivo invalido. Envie uma imagem PNG, JPG ou WEBP.");
+    }
+
+    const ext = fileExtensionFromType(detectedType);
     if (!ext) {
-      return NextResponse.json({ error: "Formato invalido. Use PNG, JPG ou WEBP" }, { status: 400 });
+      return apiError(400, "VALIDATION_ERROR", "Formato invalido. Use PNG, JPG ou WEBP");
+    }
+
+    if (photo.type && photo.type !== detectedType) {
+      return apiError(400, "VALIDATION_ERROR", "Tipo do arquivo nao corresponde ao conteudo da imagem.");
     }
 
     const uploadsDir = path.join(process.cwd(), "public", "uploads", "profiles");
     await mkdir(uploadsDir, { recursive: true });
 
-    const fileName = `${user.id}-${Date.now()}.${ext}`;
+    const fileName = `${user.id}-${randomUUID()}.${ext}`;
     const filePath = path.join(uploadsDir, fileName);
-    const fileBytes = Buffer.from(await photo.arrayBuffer());
     await writeFile(filePath, fileBytes);
 
     nextImage = `/uploads/profiles/${fileName}`;
@@ -158,5 +216,5 @@ export async function PATCH(req: Request) {
     },
   });
 
-  return NextResponse.json(updated);
+  return apiOk(updated);
 }
