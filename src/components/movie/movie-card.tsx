@@ -21,7 +21,7 @@ export function MovieCard({ item, mediaType, status }: MovieCardProps) {
   const release = item.release_date ?? item.first_air_date;
 
   return (
-    <article className="group relative w-[190px] shrink-0 overflow-hidden rounded-xl border border-black/[0.08] bg-white shadow-sm dark:border-white/10 dark:bg-black/30 dark:shadow-none">
+    <article className="group relative w-[190px] shrink-0 overflow-hidden rounded-xl border border-white/10 bg-black/30">
       <Link href={`/movies/${item.id}?type=${mediaType}`}>
         <div className="relative aspect-[2/3] overflow-hidden">
           <Image
@@ -37,8 +37,8 @@ export function MovieCard({ item, mediaType, status }: MovieCardProps) {
 
       <div className="space-y-2 p-3">
         <h3 className="line-clamp-1 text-sm font-semibold">{title}</h3>
-        <p className="line-clamp-2 text-xs text-foreground/60">{item.overview || "Sem sinopse disponível."}</p>
-        <div className="flex items-center justify-between text-xs text-foreground/60">
+        <p className="line-clamp-2 text-xs text-white/70">{item.overview || "Sem sinopse disponível."}</p>
+        <div className="flex items-center justify-between text-xs text-white/70">
           <Badge>{getYear(release)}</Badge>
           <span className="inline-flex items-center gap-1">
             <Star size={12} className="fill-[var(--accent)] text-[var(--accent)]" />
