@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="500" height="750" viewBox="0 0 500 750" fill="none">
+  <rect width="500" height="750" fill="#181818"/>
+  <rect x="24" y="24" width="452" height="702" rx="12" fill="#222"/>
+  <path d="M118 520L202 422L278 494L344 430L410 520" stroke="#3B3B3B" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="192" cy="278" r="38" fill="#3B3B3B"/>
+  <text x="250" y="624" fill="#7A7A7A" font-size="30" text-anchor="middle" font-family="Verdana, sans-serif">NO POSTER</text>
+</svg>
