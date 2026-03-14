@@ -43,13 +43,13 @@ export function UserMenu({ name, username, image }: UserMenuProps) {
   return (
     <div ref={containerRef} className="relative flex w-fit self-start items-center gap-3 lg:self-auto">
       <div className="hidden text-right md:block">
-        <p className="text-sm font-semibold text-white">{name ?? username ?? "Usuário"}</p>
-        <p className="text-xs text-white/60">Sessão ativa</p>
+        <p className="text-sm font-semibold text-foreground">{name ?? username ?? "Usuário"}</p>
+        <p className="text-xs text-foreground/55">Sessão ativa</p>
       </div>
 
       <button
         type="button"
-        className="h-9 w-9 overflow-hidden rounded-full border border-white/20 transition hover:border-white/45"
+        className="h-9 w-9 overflow-hidden rounded-full border border-black/[0.12] transition hover:border-black/[0.3] dark:border-white/20 dark:hover:border-white/45"
         aria-haspopup="menu"
         aria-expanded={open}
         aria-label="Abrir menu do usuario"
@@ -58,16 +58,16 @@ export function UserMenu({ name, username, image }: UserMenuProps) {
         {image ? (
           <Image src={image} alt={name ?? "Perfil"} width={36} height={36} className="h-full w-full object-cover" />
         ) : (
-          <div className="grid h-full w-full place-items-center bg-white/10 text-xs font-bold text-white">{fallbackInitial}</div>
+          <div className="grid h-full w-full place-items-center bg-foreground/10 text-xs font-bold text-foreground">{fallbackInitial}</div>
         )}
       </button>
 
       {open && (
         <div
           role="menu"
-          className="absolute left-0 top-11 z-50 w-40 max-w-[calc(100vw-2rem)] rounded-xl border border-white/15 bg-black/85 p-1 shadow-2xl backdrop-blur md:left-auto md:right-0"
+          className="absolute left-0 top-11 z-50 w-40 max-w-[calc(100vw-2rem)] rounded-xl border border-black/[0.08] bg-background p-1 shadow-2xl backdrop-blur dark:border-white/15 dark:bg-black/90 md:left-auto md:right-0"
         >
-          <Link href="/profile" className="flex h-8 items-center gap-2 rounded-md px-3 text-sm text-white hover:bg-white/10" onClick={() => setOpen(false)}>
+          <Link href="/profile" className="flex h-8 items-center gap-2 rounded-md px-3 text-sm text-foreground hover:bg-black/[0.06] dark:text-white dark:hover:bg-white/10" onClick={() => setOpen(false)}>
             <User size={16} />
             Perfil
           </Link>
@@ -75,7 +75,7 @@ export function UserMenu({ name, username, image }: UserMenuProps) {
             type="button"
             variant="ghost"
             size="sm"
-            className="w-full justify-start gap-2 text-white hover:bg-white/10"
+            className="w-full justify-start gap-2 text-foreground hover:bg-black/[0.06] dark:text-white dark:hover:bg-white/10"
             onClick={() => signOut({ callbackUrl: "/login" })}
           >
             <LogOut size={16} />

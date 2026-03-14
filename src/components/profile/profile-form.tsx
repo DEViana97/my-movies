@@ -70,18 +70,18 @@ export function ProfileForm({ initial }: ProfileFormProps) {
   }
 
   return (
-    <section className="rounded-2xl border border-white/10 bg-black/35 p-5 md:p-7">
+    <section className="rounded-2xl border border-black/[0.08] bg-white shadow-sm dark:border-white/10 dark:bg-black/35 dark:shadow-none p-5 md:p-7">
       <h1 className="text-4xl font-black">Meu Perfil</h1>
-      <p className="mt-2 text-sm text-white/70">Edite seu usuario, troque a senha e escolha sua foto de perfil.</p>
+      <p className="mt-2 text-sm text-foreground/60">Edite seu usuario, troque a senha e escolha sua foto de perfil.</p>
 
       <form onSubmit={onSubmit} className="mt-6 grid gap-6 md:grid-cols-[220px_1fr]">
         <div className="space-y-3">
           <p className="text-sm font-semibold">Foto de perfil</p>
-          <div className="h-28 w-28 overflow-hidden rounded-full border border-white/20 bg-white/10">
+          <div className="h-28 w-28 overflow-hidden rounded-full border border-black/[0.12] bg-foreground/[0.06] dark:border-white/20 dark:bg-white/10">
             {previewUrl ? (
               <Image src={previewUrl} alt="Foto de perfil" width={112} height={112} className="h-full w-full object-cover" unoptimized />
             ) : (
-              <div className="grid h-full w-full place-items-center text-3xl font-black text-white/90">{initialLabel}</div>
+              <div className="grid h-full w-full place-items-center text-3xl font-black text-foreground/80">{initialLabel}</div>
             )}
           </div>
           <Input
@@ -90,19 +90,19 @@ export function ProfileForm({ initial }: ProfileFormProps) {
             onChange={(e) => setPhotoFile(e.target.files?.[0] ?? null)}
             className="h-auto py-2"
           />
-          <p className="text-xs text-white/60">PNG, JPG ou WEBP ate 2MB.</p>
+          <p className="text-xs text-foreground/55">PNG, JPG ou WEBP ate 2MB.</p>
         </div>
 
         <div className="space-y-4">
           <div className="space-y-2">
-            <label className="text-sm font-semibold text-white" htmlFor="profile-email">
+            <label className="text-sm font-semibold text-foreground" htmlFor="profile-email">
               Email
             </label>
             <Input id="profile-email" value={initial.email} disabled />
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-semibold text-white" htmlFor="profile-username">
+            <label className="text-sm font-semibold text-foreground" htmlFor="profile-username">
               Usuario
             </label>
             <Input
@@ -117,7 +117,7 @@ export function ProfileForm({ initial }: ProfileFormProps) {
 
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
-              <label className="text-sm font-semibold text-white" htmlFor="profile-current-password">
+              <label className="text-sm font-semibold text-foreground" htmlFor="profile-current-password">
                 Senha atual
               </label>
               <Input
@@ -129,7 +129,7 @@ export function ProfileForm({ initial }: ProfileFormProps) {
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-semibold text-white" htmlFor="profile-new-password">
+              <label className="text-sm font-semibold text-foreground" htmlFor="profile-new-password">
                 Nova senha
               </label>
               <Input

@@ -5,7 +5,7 @@ import type { TmdbMedia } from "@/types/tmdb";
 export function UserListGrid({ items }: { items: UserListItem[] }) {
   if (!items.length) {
     return (
-      <div className="rounded-xl border border-dashed border-white/20 bg-black/20 p-10 text-center text-white/70">
+      <div className="rounded-xl border border-dashed border-black/[0.12] bg-black/[0.03] p-10 text-center text-foreground/60 dark:border-white/20 dark:bg-black/20 dark:text-white/70">
         Sua lista ainda está vazia.
       </div>
     );
