@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { GlobalSearch } from "@/components/layout/global-search";
 import { MobileNavDrawer } from "@/components/layout/mobile-nav-drawer";
+import { NavLinks } from "@/components/layout/nav-links";
 import { UserMenu } from "@/components/layout/user-menu";
 
 const navItems = [
@@ -26,36 +27,30 @@ export async function AppHeader() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-white/10 bg-black/40 backdrop-blur-xl">
-      <div className="mx-auto w-full max-w-7xl px-4 py-4 lg:px-8">
-        <div className="flex items-center justify-between gap-3">
-          <Link href="/" className="text-2xl font-black tracking-tight text-[var(--accent)]">
-            CineVault
-          </Link>
+      <div className="mx-auto flex w-full max-w-7xl items-center gap-3 px-4 py-3 lg:px-8">
+        {/* Logo */}
+        <Link href="/" className="shrink-0 text-2xl font-black tracking-tight text-[var(--accent)]">
+          CineVault
+        </Link>
 
-          <div className="flex items-center gap-2">
-            <MobileNavDrawer navItems={navItems} user={user} />
+        {/* Desktop nav — left of search */}
+        <NavLinks items={navItems} />
 
-            <div className="hidden lg:block">
-              <GlobalSearch />
-            </div>
+        {/* Spacer */}
+        <div className="flex-1" />
 
-            <div className="hidden lg:block">
-              <UserMenu name={user.name} username={user.username} image={user.image} />
-            </div>
+        {/* Right side */}
+        <div className="flex items-center gap-2">
+          <MobileNavDrawer navItems={navItems} user={user} />
+
+          <div className="hidden lg:block">
+            <GlobalSearch />
+          </div>
+
+          <div className="hidden lg:block">
+            <UserMenu name={user.name} username={user.username} image={user.image} />
           </div>
         </div>
-
-        <nav className="mt-3 hidden items-center gap-3 text-sm text-white/80 lg:flex">
-          {navItems.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="rounded-md px-2 py-1 transition hover:bg-white/10 hover:text-white"
-            >
-              {item.label}
-            </Link>
-          ))}
-        </nav>
       </div>
     </header>
   );
