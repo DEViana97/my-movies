@@ -40,7 +40,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
   const filteredResults = discovery.results.filter((item) => item.poster_path);
 
   return (
-    <AppShell user={{ name: session.user.name, username: session.user.username, image: session.user.image }}>
+    <AppShell>
       <section className="space-y-5 reveal">
         <h1 className="text-4xl font-black">Busca e Filtros</h1>
 

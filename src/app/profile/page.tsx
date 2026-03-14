@@ -54,7 +54,7 @@ export default async function ProfilePage() {
   ];
 
   return (
-    <AppShell user={{ name: user?.name ?? session.user.name, username: user?.username ?? session.user.username, image: user?.image ?? session.user.image }}>
+    <AppShell>
       <div className="reveal space-y-6">
         <div className="grid grid-cols-3 gap-3 md:gap-5">
           {stats.map(({ label, value, icon: Icon, color, bg, border }) => (

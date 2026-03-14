@@ -43,7 +43,7 @@ export default async function Home() {
   }
 
   return (
-    <AppShell user={{ name: session.user.name, username: session.user.username, image: session.user.image }}>
+    <AppShell>
       <div className="space-y-8 reveal">
         <div className="stagger grid gap-8">
           <MovieCarousel title="Filmes populares" mediaType="movie" items={popularMovies.results} />

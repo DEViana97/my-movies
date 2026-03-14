@@ -37,7 +37,7 @@ export default async function MovieDetailsPage({ params, searchParams }: PagePro
   const releaseDate = details.release_date ?? details.first_air_date;
 
   return (
-    <AppShell user={{ name: session.user.name, username: session.user.username, image: session.user.image }}>
+    <AppShell>
       <article className="space-y-8 reveal">
         <section className="relative overflow-hidden rounded-2xl border border-white/10 bg-black/35">
           <div className="grid gap-6 p-5 md:grid-cols-[280px_1fr] md:p-7">
