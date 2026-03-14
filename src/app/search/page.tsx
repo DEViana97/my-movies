@@ -17,7 +17,7 @@ type SearchPageProps = {
 };
 
 export default async function SearchPage({ searchParams }: SearchPageProps) {
-  const session = await requireAuth();
+  await requireAuth();
   const params = await searchParams;
 
   const mediaType = params.type === "tv" ? "tv" : "movie";
