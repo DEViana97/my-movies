@@ -7,10 +7,12 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useMovieUIStore } from "@/store/use-movie-ui-store";
 
 export function LoginContent() {
   const { status } = useSession();
   const router = useRouter();
+  const showToast = useMovieUIStore((state) => state.showToast);
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -38,9 +40,11 @@ export function LoginContent() {
 
     if (!res || res.error) {
       setError("Email/usuario ou senha invalidos.");
+      showToast("Email/usuario ou senha invalidos.", "error");
       return;
     }
 
+    showToast("Login realizado com sucesso", "success");
     router.replace("/");
     router.refresh();
   }

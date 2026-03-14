@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { getErrorMessage } from "@/lib/error-message";
+import { useMovieUIStore } from "@/store/use-movie-ui-store";
 
 type RegisterPayload = {
   name: string;
@@ -16,6 +18,7 @@ type RegisterPayload = {
 
 export function RegisterContent() {
   const router = useRouter();
+  const showToast = useMovieUIStore((state) => state.showToast);
   const [form, setForm] = useState<RegisterPayload>({
     name: "",
     username: "",
@@ -40,7 +43,9 @@ export function RegisterContent() {
 
     if (!registerRes.ok) {
       setIsSubmitting(false);
-      setError(registerData?.error ?? "Nao foi possivel criar a conta.");
+      const message = getErrorMessage(registerData, "Nao foi possivel criar a conta.");
+      setError(message);
+      showToast(message, "error");
       return;
     }
 
@@ -54,10 +59,12 @@ export function RegisterContent() {
     setIsSubmitting(false);
 
     if (!signInRes || signInRes.error) {
+      showToast("Conta criada. Entre com suas credenciais.", "info");
       router.replace("/login");
       return;
     }
 
+    showToast("Conta criada com sucesso", "success");
     router.replace("/");
     router.refresh();
   }

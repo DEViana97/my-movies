@@ -52,6 +52,7 @@ async function removeListItem(listType: "FAVORITE" | "WATCH_LATER" | "WATCHED", 
 export function MovieActions({ compact, ...props }: MovieActionsProps) {
   const queryClient = useQueryClient();
   const setLastAction = useMovieUIStore((state) => state.setLastAction);
+  const showToast = useMovieUIStore((state) => state.showToast);
   const [isFavorite, setIsFavorite] = useState(Boolean(props.initialFavorite));
   const [isWatchLater, setIsWatchLater] = useState(Boolean(props.initialWatchLater));
   const [isWatched, setIsWatched] = useState(Boolean(props.initialWatched));
@@ -110,6 +111,9 @@ export function MovieActions({ compact, ...props }: MovieActionsProps) {
       }
 
       invalidateLists();
+    },
+    onError: (error) => {
+      showToast(error instanceof Error ? error.message : "Nao foi possivel concluir a acao", "error");
     },
   });
 

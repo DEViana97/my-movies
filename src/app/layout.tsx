@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Bebas_Neue, Manrope } from "next/font/google";
 import { AppHeader } from "@/components/layout/app-header";
 import { Providers } from "@/components/providers";
+import { ActionFeedback } from "@/components/ui/action-feedback";
 import "./globals.css";
 
 const display = Bebas_Neue({
@@ -31,6 +32,7 @@ export default function RootLayout({
         <Providers>
           <AppHeader />
           {children}
+          <ActionFeedback />
         </Providers>
       </body>
     </html>

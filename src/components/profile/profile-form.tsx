@@ -6,6 +6,8 @@ import { useSession } from "next-auth/react";
 import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { getErrorMessage } from "@/lib/error-message";
+import { useMovieUIStore } from "@/store/use-movie-ui-store";
 
 type ProfileFormProps = {
   initial: {
@@ -18,6 +20,7 @@ type ProfileFormProps = {
 export function ProfileForm({ initial }: ProfileFormProps) {
   const router = useRouter();
   const { update } = useSession();
+  const showToast = useMovieUIStore((state) => state.showToast);
 
   const [username, setUsername] = useState(initial.username);
   const [currentPassword, setCurrentPassword] = useState("");
@@ -58,13 +61,16 @@ export function ProfileForm({ initial }: ProfileFormProps) {
     setIsSaving(false);
 
     if (!res.ok) {
-      setError(data?.error ?? "Nao foi possivel atualizar seu perfil");
+      const message = getErrorMessage(data, "Nao foi possivel atualizar seu perfil");
+      setError(message);
+      showToast(message, "error");
       return;
     }
 
     setCurrentPassword("");
     setNewPassword("");
     setFeedback("Perfil atualizado com sucesso");
+    showToast("Perfil atualizado com sucesso", "success");
     await update({ username: data?.username, image: data?.image, name: data?.name });
     router.refresh();
   }
