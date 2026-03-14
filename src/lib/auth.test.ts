@@ -1,5 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+type MockedAsyncCompare = {
+  mockResolvedValueOnce: (value: boolean) => unknown;
+};
+
 vi.mock("@/lib/prisma", () => ({
   prisma: {
     user: {
@@ -34,6 +38,7 @@ describe("authOptions credentials provider", () => {
   it("returns null when password does not match", async () => {
     const { prisma } = await import("@/lib/prisma");
     const { compare } = await import("bcryptjs");
+    const compareMock = compare as unknown as MockedAsyncCompare;
 
     const mockedPrisma = prisma as unknown as {
       user: {
@@ -50,7 +55,7 @@ describe("authOptions credentials provider", () => {
       passwordHash: "hashed",
     });
 
-    vi.mocked(compare).mockResolvedValueOnce(false);
+    compareMock.mockResolvedValueOnce(false);
 
     const { authOptions } = await import("@/lib/auth");
     const provider = authOptions.providers[0] as { authorize?: (credentials?: Record<string, string>) => Promise<unknown> };
