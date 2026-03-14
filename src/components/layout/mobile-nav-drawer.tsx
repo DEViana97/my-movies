@@ -63,7 +63,7 @@ export function MobileNavDrawer({ navItems, user }: MobileNavDrawerProps) {
         aria-hidden={!open}
       >
         <div className="flex items-center justify-between">
-          <p className="text-xl font-black tracking-tight text-[var(--accent)]">CineVault</p>
+          <p className="text-xl font-black tracking-tight text-[var(--accent)]">CineDEViana</p>
           <button
             type="button"
             className="grid h-9 w-9 place-items-center rounded-md border border-white/20 text-white/90 transition hover:bg-white/10"

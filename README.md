@@ -1,4 +1,4 @@
-# CineVault
+# CineDEViana
 
 Aplicacao web para descoberta e organizacao de filmes e series com autenticacao, listas pessoais e perfil de usuario.
 
