@@ -81,8 +81,12 @@ export function MovieActions({ compact, ...props }: MovieActionsProps) {
       }
 
       if (next.action === "watched") {
-        await saveListItem("WATCHED", props);
-        await removeListItem("WATCH_LATER", props.tmdbId, props.mediaType);
+        if (isWatched) {
+          await removeListItem("WATCHED", props.tmdbId, props.mediaType);
+        } else {
+          await saveListItem("WATCHED", props);
+          await removeListItem("WATCH_LATER", props.tmdbId, props.mediaType);
+        }
       }
     },
     onSuccess: (_, variables) => {
@@ -95,9 +99,14 @@ export function MovieActions({ compact, ...props }: MovieActionsProps) {
         setLastAction(isWatchLater ? "Removido de assistir depois" : "Salvo para assistir depois");
       }
       if (variables.action === "watched") {
-        setIsWatched(true);
-        setIsWatchLater(false);
-        setLastAction("Marcado como assistido");
+        if (isWatched) {
+          setIsWatched(false);
+          setLastAction("Removido dos assistidos");
+        } else {
+          setIsWatched(true);
+          setIsWatchLater(false);
+          setLastAction("Marcado como assistido");
+        }
       }
 
       invalidateLists();
