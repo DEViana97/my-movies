@@ -5,7 +5,17 @@ import { checkRateLimit, getRequestIp } from "@/lib/rate-limit";
 
 const handler = NextAuth(authOptions);
 
-async function withRateLimit(req: Request) {
+type AuthRouteContext = {
+  params: Promise<{
+    nextauth?: string[];
+  }>;
+};
+
+async function withRateLimit(req: Request, context: AuthRouteContext) {
+  if (req.method === "GET") {
+    return handler(req, context);
+  }
+
   const limiter = checkRateLimit(`auth:${getRequestIp(req)}`, {
     windowMs: 10 * 60 * 1000,
     limit: 80,
@@ -17,7 +27,7 @@ async function withRateLimit(req: Request) {
     });
   }
 
-  return handler(req);
+  return handler(req, context);
 }
 
 export const GET = withRateLimit;
