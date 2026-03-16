@@ -19,6 +19,11 @@ const body = Manrope({
 export const metadata: Metadata = {
   title: "DEVMovies",
   description: "Descubra, organize e acompanhe filmes e séries",
+  icons: {
+    icon: "/favicon.png",
+    shortcut: "/favicon.png",
+    apple: "/favicon.png",
+  },
 };
 
 export default function RootLayout({
