@@ -37,8 +37,23 @@ export async function getMediaTrailer(id: string, mediaType: MediaType = "movie"
   return data.results.find((video) => video.site === "YouTube" && video.type === "Trailer") ?? null;
 }
 
+type MovieReleaseDatesResponse = {
+  id: number;
+  results: Array<{
+    iso_3166_1: string;
+    release_dates: Array<{
+      release_date: string;
+      type: number;
+    }>;
+  }>;
+};
+
 export async function searchMulti(query: string) {
   return apiClient<TmdbPagedResponse<TmdbMedia>>(`/search/multi?query=${encodeURIComponent(query)}&include_adult=false`);
+}
+
+export async function getMovieReleaseDates(movieId: number) {
+  return apiClient<MovieReleaseDatesResponse>(`/movie/${movieId}/release_dates`);
 }
 
 export async function discoverWithFilters(filters: {
@@ -55,7 +70,10 @@ export async function discoverWithFilters(filters: {
 
   if (filters.releaseDateGte) {
     if (filters.mediaType === "movie") {
-      path.set("primary_release_date.gte", filters.releaseDateGte);
+      // Use region-specific release dates and theatrical types from TMDB release types.
+      path.set("region", "BR");
+      path.set("with_release_type", "2|3");
+      path.set("release_date.gte", filters.releaseDateGte);
     } else {
       path.set("first_air_date.gte", filters.releaseDateGte);
     }
