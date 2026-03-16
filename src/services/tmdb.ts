@@ -56,6 +56,29 @@ export async function getMovieReleaseDates(movieId: number) {
   return apiClient<MovieReleaseDatesResponse>(`/movie/${movieId}/release_dates`);
 }
 
+type WatchProvider = {
+  logo_path: string;
+  provider_id: number;
+  provider_name: string;
+  display_priority: number;
+};
+
+type WatchProviderCountry = {
+  link: string;
+  flatrate?: WatchProvider[];
+  rent?: WatchProvider[];
+  buy?: WatchProvider[];
+};
+
+type WatchProvidersResponse = {
+  id: number;
+  results: Record<string, WatchProviderCountry>;
+};
+
+export async function getWatchProviders(id: string, mediaType: MediaType = "movie") {
+  return apiClient<WatchProvidersResponse>(`/${mediaType}/${id}/watch/providers`);
+}
+
 export async function discoverWithFilters(filters: {
   mediaType: MediaType;
   genre?: string;
