@@ -1,6 +1,7 @@
+"use client";
+
 import Link from "next/link";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { useSession } from "next-auth/react";
 import { GlobalSearch } from "@/components/layout/global-search";
 import { MobileNavDrawer } from "@/components/layout/mobile-nav-drawer";
 import { NavLinks } from "@/components/layout/nav-links";
@@ -13,8 +14,10 @@ const navItems = [
   { href: "/watched", label: "Assistidos" },
 ];
 
-export async function AppHeader() {
-  const session = await getServerSession(authOptions);
+export function AppHeader() {
+  const { data: session, status } = useSession();
+
+  if (status === "loading") return null;
 
   if (!session?.user) return null;
 
