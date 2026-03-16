@@ -9,7 +9,6 @@ type SearchPageProps = {
   searchParams: Promise<{
     q?: string;
     genre?: string;
-    releaseDate?: string;
     minRating?: string;
     minPopularity?: string;
     type?: MediaType;
@@ -27,7 +26,6 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
     discoverWithFilters({
       mediaType,
       genre: params.genre,
-      releaseDateGte: params.releaseDate,
       voteAverageGte: params.minRating,
       popularityGte: params.minPopularity,
     }),
@@ -69,16 +67,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
             ))}
           </select>
 
-          <Input type="date" name="releaseDate" defaultValue={params.releaseDate ?? ""} />
-          <Input type="number" min="0" max="10" step="0.1" name="minRating" defaultValue={params.minRating ?? ""} placeholder="Nota min" />
-          <Input
-            type="number"
-            min="0"
-            step="10"
-            name="minPopularity"
-            defaultValue={params.minPopularity ?? ""}
-            placeholder="Popularidade"
-          />
+          <Input type="number" min="0" max="10" step="0.1" name="minRating" defaultValue={params.minRating ?? ""} placeholder="Nota minima" />
 
           <button
             type="submit"
