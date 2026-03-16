@@ -53,7 +53,7 @@ export function LoginContent() {
     <main className="grid min-h-screen place-items-center px-4">
       <section className="w-full max-w-md rounded-2xl border border-white/10 bg-black/45 p-8 text-white shadow-2xl backdrop-blur-md">
         <p className="text-xs uppercase tracking-[0.2em] text-[var(--accent)]">Bem-vindo</p>
-        <h1 className="mt-3 text-4xl font-black leading-none">CineDEViana</h1>
+        <h1 className="mt-3 text-4xl font-black leading-none">DEVMovies</h1>
         <p className="mt-3 text-sm text-white/70">Entre com email/usuario e senha, ou use sua conta Google.</p>
 
         <form className="mt-6 space-y-3" onSubmit={onCredentialsSubmit}>

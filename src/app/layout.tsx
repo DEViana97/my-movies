@@ -17,7 +17,7 @@ const body = Manrope({
 });
 
 export const metadata: Metadata = {
-  title: "CineDEViana",
+  title: "DEVMovies",
   description: "Descubra, organize e acompanhe filmes e séries",
 };
 

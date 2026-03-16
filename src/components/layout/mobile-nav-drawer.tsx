@@ -59,7 +59,7 @@ export function MobileNavDrawer({ navItems, user }: MobileNavDrawerProps) {
 
           <aside className="fixed right-0 top-0 z-[70] flex h-screen w-[86vw] max-w-sm flex-col border-l border-white/15 bg-[#07111d] p-4 shadow-2xl transition-transform duration-300 lg:hidden">
             <div className="flex items-center justify-between">
-              <p className="text-xl font-black tracking-tight text-[var(--accent)]">CineDEViana</p>
+              <p className="text-xl font-black tracking-tight text-[var(--accent)]">DEVMovies</p>
               <button
                 type="button"
                 className="grid h-9 w-9 place-items-center rounded-md border border-white/20 text-white/90 transition hover:bg-white/10"

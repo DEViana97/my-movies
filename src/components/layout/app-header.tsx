@@ -29,7 +29,7 @@ export async function AppHeader() {
       <div className="mx-auto flex w-full max-w-7xl items-center gap-3 px-4 py-3 lg:px-8">
         {/* Logo */}
         <Link href="/" className="shrink-0 text-2xl font-black tracking-tight text-[var(--accent)]">
-          CineDEViana
+          DEVMovies
         </Link>
 
         {/* Desktop nav — left of search */}
