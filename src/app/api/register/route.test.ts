@@ -1,17 +1,19 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("@/lib/prisma", () => ({
-  prisma: {
-    user: {
-      findFirst: vi.fn(),
-      create: vi.fn(),
-    },
-  },
-}));
-
 describe("POST /api/register", () => {
+  let findFirstMock: ReturnType<typeof vi.fn>;
+  let createMock: ReturnType<typeof vi.fn>;
+
   beforeEach(() => {
-    vi.clearAllMocks();
+    vi.resetModules();
+    findFirstMock = vi.fn();
+    createMock = vi.fn();
+    vi.doMock("@/lib/prisma", () => ({
+      prisma: { user: { findFirst: findFirstMock, create: createMock } },
+    }));
+    vi.doMock("bcryptjs", () => ({
+      hash: vi.fn().mockResolvedValue("hashed"),
+    }));
   });
 
   it("returns validation error for invalid payload", async () => {
@@ -35,15 +37,7 @@ describe("POST /api/register", () => {
   });
 
   it("returns conflict when username already exists", async () => {
-    const { prisma } = await import("@/lib/prisma");
-    const mockedPrisma = prisma as unknown as {
-      user: {
-        findFirst: ReturnType<typeof vi.fn>;
-        create: ReturnType<typeof vi.fn>;
-      };
-    };
-
-    mockedPrisma.user.findFirst.mockResolvedValueOnce({ username: "mateus", email: "foo@bar.com" });
+    findFirstMock.mockResolvedValue({ username: "mateus", email: "foo@bar.com" });
 
     const { POST } = await import("./route");
     const req = new Request("http://localhost/api/register", {
@@ -67,20 +61,12 @@ describe("POST /api/register", () => {
     expect(data.ok).toBe(false);
     expect(data.code).toBe("CONFLICT");
     expect(data.error).toContain("Usuario");
-    expect(mockedPrisma.user.create).not.toHaveBeenCalled();
+    expect(createMock).not.toHaveBeenCalled();
   });
 
   it("creates user and returns 201 on success", async () => {
-    const { prisma } = await import("@/lib/prisma");
-    const mockedPrisma = prisma as unknown as {
-      user: {
-        findFirst: ReturnType<typeof vi.fn>;
-        create: ReturnType<typeof vi.fn>;
-      };
-    };
-
-    mockedPrisma.user.findFirst.mockResolvedValueOnce(null);
-    mockedPrisma.user.create.mockResolvedValueOnce({ id: "u1" });
+    findFirstMock.mockResolvedValue(null);
+    createMock.mockResolvedValue({ id: "u1" });
 
     const { POST } = await import("./route");
     const req = new Request("http://localhost/api/register", {
@@ -102,10 +88,13 @@ describe("POST /api/register", () => {
 
     expect(res.status).toBe(201);
     expect(data.ok).toBe(true);
-    expect(mockedPrisma.user.create).toHaveBeenCalledTimes(1);
+    expect(createMock).toHaveBeenCalledTimes(1);
   });
 
   it("rate limits repeated requests from same ip", async () => {
+    findFirstMock.mockResolvedValue(null);
+    createMock.mockResolvedValue({ id: "u1" });
+
     const { POST } = await import("./route");
 
     const makeReq = () =>

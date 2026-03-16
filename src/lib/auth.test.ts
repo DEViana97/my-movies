@@ -4,6 +4,23 @@ type MockedAsyncCompare = {
   mockResolvedValueOnce: (value: boolean) => unknown;
 };
 
+vi.mock("@auth/prisma-adapter", () => ({
+  PrismaAdapter: vi.fn(() => ({})),
+}));
+
+vi.mock("next-auth", () => ({
+  default: vi.fn(),
+  getServerSession: vi.fn(),
+}));
+
+vi.mock("next-auth/providers/google", () => ({
+  default: vi.fn(() => ({ id: "google", name: "Google", type: "oauth" })),
+}));
+
+vi.mock("next-auth/providers/credentials", () => ({
+  default: (options: Record<string, unknown>) => ({ ...options, id: "credentials", type: "credentials" }),
+}));
+
 vi.mock("@/lib/prisma", () => ({
   prisma: {
     user: {
@@ -24,6 +41,7 @@ vi.mock("next/navigation", () => ({
 describe("authOptions credentials provider", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.resetModules();
   });
 
   it("returns null when credentials are missing", async () => {
