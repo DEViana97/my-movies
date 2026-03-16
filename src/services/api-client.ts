@@ -8,7 +8,7 @@ export async function apiClient<T>(path: string, options?: FetchOptions): Promis
     throw new Error("Missing TMDB_API_KEY environment variable");
   }
 
-  const url = new URL(`https://api.themoviedb.org/3${path}`);
+  const url = new URL(`https://api.themoviedb.org/3${path}?language=pt-BR`);
   if (!url.searchParams.get("api_key")) {
     url.searchParams.set("api_key", apiKey);
   }
